@@ -788,6 +788,8 @@ class ConnectionState:
                 call._update_voice_state(data)
 
     def parse_voice_server_update(self, data):
+        self.dispatch('voice_server_update', data)
+
         try:
             key_id = int(data['guild_id'])
         except KeyError:
