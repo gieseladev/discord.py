@@ -17,7 +17,7 @@ import re, os
 requirements = list(x.strip() for x in open('requirements.txt'))
 
 install_requires_replacements = {
-    'https://github.com/aaugustin/websockets/tarball/master': 'websockets',
+    'https://github.com/aaugustin/websockets/tarball/master': 'websockets>=4.0,<5',
 }
 requirements = [
     install_requires_replacements.get(
