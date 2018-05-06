@@ -1,5 +1,6 @@
-discord.py
-==========
+NOTE: This is a fork of discord.py that is kept automatically up-to-date with the **upstream/rewrite** branch of discord.py. There are slight modifications which do not change any major core compatibility. Several GieselaDev repos and others pull from here. Targeted for Python >=3.6+ using rewrite with voice. 
+
+---------------
 
 .. image:: https://img.shields.io/pypi/v/discord.py.svg
    :target: https://pypi.python.org/pypi/discord.py
@@ -20,30 +21,17 @@ I recommend joining either the `official discord.py server <https://discord.gg/r
 Installing
 ----------
 
-To install the library without full voice support, you can just run the following command:
-
-.. code:: sh
-
-    python3 -m pip install -U discord.py
-
-Otherwise to get voice support you should run the following command:
-
-.. code:: sh
-
-    python3 -m pip install -U discord.py[voice]
-
-
 To install the development version, do the following:
 
 .. code:: sh
 
-    python3 -m pip install -U https://github.com/Rapptz/discord.py/archive/master.zip#egg=discord.py[voice]
+    python3 -m pip install -U https://github.com/GieselaDev/discord.py/archive/rewrite.zip#egg=discord.py[voice]
 
 or the more long winded from cloned source:
 
 .. code:: sh
 
-    $ git clone https://github.com/Rapptz/discord.py
+    $ git clone https://github.com/GieselaDev/discord.py.git --branch rewrite
     $ cd discord.py
     $ python3 -m pip install -U .[voice]
 
