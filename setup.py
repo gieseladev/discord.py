@@ -1,27 +1,17 @@
 from setuptools import setup, find_packages
 import re, os
 
-# We aren't building DOCS on this branch anyway, so commented out. 
-# Right now this would always be false in our case unless we set it up and our envar.
+on_rtd = os.getenv('READTHEDOCS') == 'False'
 
+requirements = []
+with open('requirements.txt') as f:
+  requirements = f.read().splitlines()
 
-# on_rtd = os.getenv('READTHEDOCS') == 'True'
-
-
-# if on_rtd:
-#  requirements.append('sphinx==1.6.5')
-#  requirements.append('sphinxcontrib-napoleon')
-#  requirements.append('sphinxcontrib-asyncio')
-#  requirements.append('sphinxcontrib-websupport') 
-
-requirements = list(x.strip() for x in open('requirements.txt'))
-
-#install_requires_replacements = {
-#    'https://github.com/aaugustin/websockets/tarball/master': 'websockets',
-#}
-#requirements = [
-#    install_requires_replacements.get(
-#        r, r) for r in requirements]
+if on_rtd:
+  requirements.append('sphinx==1.7.4')
+  requirements.append('sphinxcontrib-napoleon')
+  requirements.append('sphinxcontrib-asyncio')
+  requirements.append('sphinxcontrib-websupport')
 
 version = ''
 with open('discord/__init__.py') as f:
