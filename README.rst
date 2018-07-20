@@ -1,15 +1,23 @@
-NOTE: This is a fork of discord.py that is kept automatically up-to-date with the **upstream/rewrite** branch of discord.py. There are slight modifications which do not change any major core compatibility. Several GieselaDev repos and others pull from here. Targeted for Python >=3.6+ using rewrite with voice. 
-
+discord.py
 ---------------
 
-.. image:: https://img.shields.io/pypi/v/discord.py.svg
-   :target: https://pypi.python.org/pypi/discord.py
-.. image:: https://img.shields.io/pypi/pyversions/discord.py.svg
-   :target: https://pypi.python.org/pypi/discord.py
+NOTE: This is a fork of discord.py that is kept automatically up-to-date with the **upstream/rewrite** branch of discord.py. There are slight modifications which do not change any major core compatibility. Several GieselaDev repos and others pull from here. Targeted for Python >=3.6+ using rewrite with voice. 
 
+|Python Versions| |Maintained| |License|
+---------------
+
+..  |Maintained| image:: https://img.shields.io/badge/Maintained%3F-yes-66b2b2.svg?style=flat-square&longCache=false
+    :target: https://github.com/GieselaDev/discord.py/graphs/commit-activity
+..  |Python Versions| image:: https://img.shields.io/badge/python-3.6,_3.7-blue.svg?style=flat-square&longCache=false
+    :target: https://github.com/GieselaDev/discord.py
+..  |License| image:: https://img.shields.io/github/license/GieselaDev/discord.py.svg?style=flat-square&longCache=false
+    :target: https://github.com/GieselaDev/discord.py/blob/rewrite/LICENSE
+
+Info
+---------------
 discord.py is an API wrapper for Discord written in Python.
 
-This was written to allow easier writing of bots or chat logs. Make sure to familiarise yourself with the API using the `documentation <http://discordpy.rtfd.org/en/latest>`__.
+This was written to allow easier writing of bots or chat logs. Make sure to familiarise yourself with the API using the `documentation <https://discordpy.readthedocs.io/en/rewrite/>`__.
 
 Breaking Changes
 ---------------
@@ -38,7 +46,7 @@ or the more long winded from cloned source:
 Please note that on Linux installing voice you must install the following packages via your favourite package manager (e.g. ``apt``, ``yum``, etc) before running the above command:
 
 * libffi-dev (or ``libffi-devel`` on some systems)
-* python-dev (e.g. ``python3.5-dev`` for Python 3.5)
+* python-dev (e.g. ``python3.6-dev`` for Python 3.6)
 
 Quick Example
 ------------
@@ -80,7 +88,7 @@ You can find examples in the examples directory.
 Requirements
 ------------
 
-* Python 3.5.3+
+* Python 3.6.3+
 * ``aiohttp`` library
 * ``websockets`` library
 * ``PyNaCl`` library (optional, for voice only)
