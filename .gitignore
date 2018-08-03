@@ -9,6 +9,4 @@ docs/_build
 *.png
 *.jpg
 *.flac
-
-requirements.txt
-setup.py
+*.mo
