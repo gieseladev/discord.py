@@ -566,6 +566,24 @@ Application Info
 
         The owner of the application. This is a :class:`User` instance
         with the owner's information at the time of the call.
+        
+    .. attribute:: bot_public
+    
+        ``True`` if the bot is considered as public, else ``False``.
+        Determines if the bot can be invited by anyone or if it is locked
+        to the token owner. Correspond to the "Public bot" box in the
+        token settings.
+        
+    .. attribute:: bot_require_code_grant
+    
+        ``True`` if the bot requires code grant, else ``False``.
+        Correspond to the "Bot requires code grant" box in the token
+        settings.
+        
+    .. attribute:: rpc_origins
+    
+        Returns an array of RPC origin URL strings, if RPC is enabled.
+        If RPC isn't enabled, returns ``None``.
 
 Profile
 ---------
@@ -729,7 +747,6 @@ All enumerations are subclasses of `enum`_.
     .. attribute:: frankfurt
 
         The Frankfurt region.
-
     .. attribute:: brazil
 
         The Brazil region.
@@ -739,8 +756,14 @@ All enumerations are subclasses of `enum`_.
     .. attribute:: russia
 
         The Russia region.
-    .. attribute:: vip_us_east
+    .. attribute:: japan
 
+        The Japan region.
+    .. attribute:: southafrica
+    
+        The South Africa region.
+    .. attribute:: vip_us_east
+    
         The US East region for VIP guilds.
     .. attribute:: vip_us_west
 

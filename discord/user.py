@@ -25,13 +25,12 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from .utils import snowflake_time, _bytes_to_base64_data, parse_time, valid_icon_size
-from .enums import DefaultAvatar, RelationshipType, UserFlags
+from .enums import DefaultAvatar, RelationshipType, UserFlags, HypeSquadHouse
 from .errors import ClientException, InvalidArgument
 
 from collections import namedtuple
 
 import discord.abc
-import asyncio
 
 VALID_STATIC_FORMATS = {"jpeg", "jpg", "webp", "png"}
 VALID_AVATAR_FORMATS = VALID_STATIC_FORMATS | {"gif"}
@@ -61,6 +60,10 @@ class Profile(namedtuple('Profile', 'flags user mutual_guilds connected_accounts
     def partner(self):
         return self._has_flag(UserFlags.partner)
 
+    @property
+    def hypesquad_houses(self):
+        flags = (UserFlags.hypesquad_bravery, UserFlags.hypesquad_brilliance, UserFlags.hypesquad_balance)
+        return [house for house, flag in zip(HypeSquadHouse, flags) if self._has_flag(flag)]
 
 _BaseUser = discord.abc.User
 
@@ -338,6 +341,10 @@ class ClientUser(BaseUser):
         email: str
             The new email you wish to change to.
             Only applicable to user accounts.
+        Optional[:class:`HypeSquadHouse`]
+            The hypesquad house you wish to change to.
+            Could be ``None`` to leave the current house.
+            Only applicable to user accounts.
         username :str
             The new username you wish to change to.
         avatar: bytes
@@ -352,6 +359,7 @@ class ClientUser(BaseUser):
             Wrong image format passed for ``avatar``.
         ClientException
             Password is required for non-bot accounts.
+            House field was not a HypeSquadHouse.
         """
 
         try:
@@ -382,6 +390,17 @@ class ClientUser(BaseUser):
                 args['new_password'] = fields['new_password']
 
         http = self._state.http
+
+        if 'house' in fields:
+            house = fields['house']
+            if house is None:
+                await http.leave_hypesquad_house()
+            elif not isinstance(house, HypeSquadHouse):
+                raise ClientException('`house` parameter was not a HypeSquadHouse')
+            else:
+                value = house.value
+
+            await http.change_hypesquad_house(value)
 
         data = await http.edit_profile(**args)
         if not_bot_account:
@@ -467,7 +486,7 @@ class User(BaseUser, discord.abc.Messageable):
         Specifies if the user is a bot account.
     """
 
-    __slots__ = ('__weakref__')
+    __slots__ = ('__weakref__',)
 
     def __repr__(self):
         return '<User id={0.id} name={0.name!r} discriminator={0.discriminator!r} bot={0.bot}>'.format(self)
