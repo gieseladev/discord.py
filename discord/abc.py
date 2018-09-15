@@ -231,6 +231,11 @@ class GuildChannel:
         else:
             parent_id = parent and parent.id
 
+        try:
+            options['rate_limit_per_user'] = options.pop('slowmode_delay')
+        except KeyError:
+            pass
+
         lock_permissions = options.pop('sync_permissions', False)
 
         try:
@@ -489,7 +494,7 @@ class GuildChannel:
         await self._state.http.delete_channel(self.id, reason=reason)
 
     async def set_permissions(self, target, *, overwrite=_undefined, reason=None, **permissions):
-        """|coro|
+        r"""|coro|
 
         Sets the channel specific permission overwrites for a target in the
         channel.
