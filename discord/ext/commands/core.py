@@ -231,6 +231,9 @@ class Command:
         return self
 
     async def _actual_conversion(self, ctx, converter, argument, param):
+        if converter is bool:
+            return _convert_to_bool(argument)
+
         try:
             module = converter.__module__
         except:
@@ -271,9 +274,6 @@ class Command:
             raise BadArgument('Converting to "{}" failed for parameter "{}".'.format(name, param.name)) from e
 
     async def do_conversion(self, ctx, converter, argument, param):
-        if converter is bool:
-            return _convert_to_bool(argument)
-
         try:
             origin = converter.__origin__
         except AttributeError:
@@ -612,7 +612,7 @@ class Command:
             The coroutine is not actually a coroutine.
         """
         if not asyncio.iscoroutinefunction(coro):
-            raise discord.ClientException('The error handler must be a coroutine.')
+            raise discord.ClientException('The pre-invoke hook must be a coroutine.')
 
         self._before_invoke = coro
         return coro
@@ -639,7 +639,7 @@ class Command:
             The coroutine is not actually a coroutine.
         """
         if not asyncio.iscoroutinefunction(coro):
-            raise discord.ClientException('The error handler must be a coroutine.')
+            raise discord.ClientException('The post-invoke hook must be a coroutine.')
 
         self._after_invoke = coro
         return coro
