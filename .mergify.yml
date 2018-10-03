@@ -4,5 +4,4 @@ rules:
       required_pull_request_reviews: null
       required_status_checks:
         contexts:
-        - security/snyk - requirements.txt (shikhir-arora)
         - security/snyk - requirements.txt (shikhir-arora (GitHub marketplace))
