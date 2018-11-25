@@ -617,6 +617,12 @@ Profile
     .. attribute:: partner
 
         A boolean indicating if the user is a Discord Partner.
+    .. attribute:: bug_hunter
+
+        A boolean indicating if the user is a Bug Hunter.
+    .. attribute:: early_supporter
+
+        A boolean indicating if the user has had premium before 10 October, 2018.
     .. attribute:: hypesquad
 
         A boolean indicating if the user is in Discord HypeSquad.
@@ -845,6 +851,17 @@ All enumerations are subclasses of `enum`_.
     .. attribute:: double_table_flip
 
         An alias for :attr:`extreme`.
+
+.. class:: NotificationLevel
+
+    Specifies whether a :class:`Guild` has notifications on for all messages or mentions only by default.
+    
+    ..attribute:: all_messages
+
+        Members receive notifications for every message regardless of them being mentioned.
+    ..attribute:: only_mentions
+
+        Members receive notifications for messages they are mentioned in.
 
 .. class:: ContentFilter
 
