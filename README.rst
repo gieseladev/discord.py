@@ -20,7 +20,7 @@ discord.py is an API wrapper for Discord written in Python.
 This was written to allow easier writing of bots or chat logs. Make sure to familiarise yourself with the API using the `documentation <https://discordpy.readthedocs.io/en/rewrite/>`__.
 
 Breaking Changes
----------------
+----------------
 
 The discord API is constantly changing and the wrapper API is as well. There will be no effort to keep backwards compatibility in versions before ``v1.0.0``.
 
@@ -49,7 +49,7 @@ Please note that on Linux installing voice you must install the following packag
 * python-dev (e.g. ``python3.6-dev`` for Python 3.6)
 
 Quick Example
-------------
+-------------
 
 .. code:: py
 
