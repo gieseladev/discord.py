@@ -1,9 +1,15 @@
 from setuptools import setup, find_packages
+import os, sys
 import re
 
 requirements = []
 with open('requirements.txt') as f:
   requirements = f.read().splitlines()
+def read_requirements():
+    reqs_path = os.path.join('.', 'requirements.txt')
+    with open(reqs_path, 'r') as f:
+        requirements = [line.rstrip() for line in f]
+    return requirements
 
 version = ''
 with open('discord/__init__.py') as f:
@@ -35,6 +41,7 @@ with open('README.rst') as f:
 
 extras_require = {
     'voice': ['PyNaCl==1.2.1'],
+    'voice': ['PyNaCl==1.3.0'],
     'docs': [
         'sphinx==1.7.4',
         'sphinxcontrib-asyncio',
@@ -53,6 +60,7 @@ setup(name='discord.py',
       long_description_content_type="text/x-rst",
       include_package_data=True,
       install_requires=requirements,
+      install_requires=read_requirements(),
       extras_require=extras_require,
       python_requires='>=3.6.3',
       classifiers=[
