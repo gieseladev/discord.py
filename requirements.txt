@@ -1,2 +1,0 @@
-aiohttp
-websockets @ git+https://github.com/aaugustin/websockets@master
