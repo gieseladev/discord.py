@@ -210,7 +210,6 @@ class Command(_BaseCommand):
         try:
             checks = func.__commands_checks__
             checks.reverse()
-            del func.__commands_checks__
         except AttributeError:
             checks = kwargs.get('checks', [])
         finally:
@@ -218,7 +217,6 @@ class Command(_BaseCommand):
 
         try:
             cooldown = func.__commands_cooldown__
-            del func.__commands_cooldown__
         except AttributeError:
             cooldown = kwargs.get('cooldown')
         finally:
@@ -270,6 +268,10 @@ class Command(_BaseCommand):
         ret = self.__class__(self.callback, **self.__original_kwargs__)
         ret._before_invoke = self._before_invoke
         ret._after_invoke = self._after_invoke
+        try:
+            ret.on_error = self.on_error
+        except AttributeError:
+            pass
         return ret
 
     def _update_copy(self, kwargs):
