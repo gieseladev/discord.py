@@ -3,7 +3,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2017 Rapptz
+Copyright (c) 2015-2019 Rapptz
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -135,6 +135,24 @@ class Cog(metaclass=CogMeta):
 
         # Either update the command with the cog provided defaults or copy it.
         self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)
+
+        lookup = {
+            cmd.qualified_name: cmd
+            for cmd in self.__cog_commands__
+        }
+
+        # Update the Command instances dynamically as well
+        for command in self.__cog_commands__:
+            setattr(self, command.callback.__name__, command)
+            parent = command.parent
+            if parent is not None:
+                # Get the latest parent reference
+                parent = lookup[parent.qualified_name]
+
+                # Update our parent's reference to ourself
+                removed = parent.remove_command(command.name)
+                parent.add_command(command)
+
         return self
 
     def get_commands(self):
@@ -320,6 +338,6 @@ class Cog(metaclass=CogMeta):
                 bot.remove_check(self.bot_check)
 
             if cls.bot_check_once is not Cog.bot_check_once:
-                bot.remove_check(self.bot_check_once)
+                bot.remove_check(self.bot_check_once, call_once=True)
         finally:
             self.cog_unload()
