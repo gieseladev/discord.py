@@ -217,7 +217,7 @@ class DiscordWebSocket(websockets.client.WebSocketClientProtocol):
         This is for internal use only.
         """
         gateway = await client.http.get_gateway()
-        ws = await websockets.connect(gateway, loop=client.loop, klass=cls, compression=None)
+        ws = await websockets.connect(gateway, loop=client.loop, klass=cls)
 
         # dynamically add attributes needed
         ws.token = client.http.token
@@ -620,7 +620,7 @@ class DiscordVoiceWebSocket(websockets.client.WebSocketClientProtocol):
     async def from_client(cls, client, *, resume=False):
         """Creates a voice websocket for the :class:`VoiceClient`."""
         gateway = 'wss://' + client.endpoint + '/?v=4'
-        ws = await websockets.connect(gateway, loop=client.loop, klass=cls, compression=None)
+        ws = await websockets.connect(gateway, loop=client.loop, klass=cls)
         ws.gateway = gateway
         ws._connection = client
         ws._max_heartbeat_timeout = 60.0
