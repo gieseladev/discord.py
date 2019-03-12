@@ -94,7 +94,13 @@ class CogMeta(type):
         listeners = []
 
         for elem, value in attrs.items():
+            is_static_method = isinstance(value, staticmethod)
+            if is_static_method:
+                value = value.__func__
             if isinstance(value, _BaseCommand):
+                if is_static_method:
+                    raise TypeError('Command in method {0!r} must not be staticmethod.'.format(elem))
+
                 commands.append(value)
             elif inspect.iscoroutinefunction(value):
                 try:
