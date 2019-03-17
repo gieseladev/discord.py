@@ -37,10 +37,9 @@ with open('README.rst') as f:
     readme = f.read()
 
 extras_require = {
-    'voice': ['PyNaCl==1.2.1'],
     'voice': ['PyNaCl==1.3.0'],
     'docs': [
-        'sphinx==1.7.4',
+        'sphinx==1.8.5',
         'sphinxcontrib-asyncio',
         'sphinxcontrib-websupport',
     ]
@@ -50,7 +49,7 @@ setup(name='discord.py',
       author='Rapptz',
       url='https://github.com/Rapptz/discord.py',
       project_urls={
-        "Documentation": "https://discordpy.readthedocs.io/en/latest/",
+        "Documentation": "https://discordpy.readthedocs.io/en/rewrite/",
         "Issue tracker": "https://github.com/Rapptz/discord.py/issues",
       },
       version=version,
@@ -69,9 +68,9 @@ setup(name='discord.py',
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Internet',
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: Libraries :: Python Modules',

@@ -294,6 +294,16 @@ class HelpCommand:
         self._command_impl._eject_cog()
         self._command_impl = None
 
+    def get_bot_mapping(self):
+        """Retrieves the bot mapping passed to :meth:`send_bot_help`."""
+        bot = self.context.bot
+        mapping = {
+            cog: cog.get_commands()
+            for cog in bot.cogs.values()
+        }
+        mapping[None] = [c for c in bot.all_commands.values() if c.cog is None]
+        return mapping
+
     @property
     def clean_prefix(self):
         """The cleaned up invoke prefix. i.e. mentions are ``@name`` instead of ``<@id>``."""
@@ -676,7 +686,12 @@ class HelpCommand:
         some state in your subclass before the command does its processing
         then this would be the place to do it.
 
-        The default implementation is empty.
+        The default implementation sets :attr:`context`.
+
+        .. warning::
+
+            If you override this method, be sure to call ``super()``
+            so the help command can be set up.
 
         .. note::
 
@@ -690,7 +705,7 @@ class HelpCommand:
         command: Optional[:class:`str`]
             The argument passed to the help command.
         """
-        return None
+        self.context = ctx
 
     async def command_callback(self, ctx, *, command=None):
         """|coro|
@@ -712,16 +727,11 @@ class HelpCommand:
         - :meth:`prepare_help_command`
 
         """
-        self.context = ctx
         await self.prepare_help_command(ctx, command)
         bot = ctx.bot
 
         if command is None:
-            mapping = {
-                cog: cog.get_commands()
-                for cog in bot.cogs.values()
-            }
-            mapping[None] = [c for c in bot.all_commands.values() if c.cog is None]
+            mapping = self.get_bot_mapping()
             return await self.send_bot_help(mapping)
 
         # Check if it's a cog
@@ -754,9 +764,9 @@ class HelpCommand:
                 cmd = found
 
         if isinstance(cmd, Group):
-            await self.send_group_help(cmd)
+            return await self.send_group_help(cmd)
         else:
-            await self.send_command_help(cmd)
+            return await self.send_command_help(cmd)
 
 class DefaultHelpCommand(HelpCommand):
     """The implementation of the default help command.
@@ -879,7 +889,12 @@ class DefaultHelpCommand(HelpCommand):
         self.paginator.add_line(signature, empty=True)
 
         if command.help:
-            self.paginator.add_line(command.help, empty=True)
+            try:
+                self.paginator.add_line(command.help, empty=True)
+            except RuntimeError:
+                for line in command.help.splitlines():
+                    self.paginator.add_line(line)
+                self.paginator.add_line()
 
     def get_destination(self):
         ctx = self.context
@@ -892,6 +907,7 @@ class DefaultHelpCommand(HelpCommand):
 
     async def prepare_help_command(self, ctx, command):
         self.paginator.clear()
+        await super().prepare_help_command(ctx, command)
 
     async def send_bot_help(self, mapping):
         ctx = self.context
@@ -1104,7 +1120,12 @@ class MinimalHelpCommand(HelpCommand):
             self.paginator.add_line(signature, empty=True)
 
         if command.help:
-            self.paginator.add_line(command.help, empty=True)
+            try:
+                self.paginator.add_line(command.help, empty=True)
+            except RuntimeError:
+                for line in command.help.splitlines():
+                    self.paginator.add_line(line)
+                self.paginator.add_line()
 
     def get_destination(self):
         ctx = self.context
@@ -1117,6 +1138,7 @@ class MinimalHelpCommand(HelpCommand):
 
     async def prepare_help_command(self, ctx, command):
         self.paginator.clear()
+        await super().prepare_help_command(ctx, command)
 
     async def send_bot_help(self, mapping):
         ctx = self.context
