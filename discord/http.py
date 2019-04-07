@@ -224,16 +224,16 @@ class HTTPClient:
             # We've run out of retries, raise.
             raise HTTPException(r, data)
 
-    async def get_attachment(self, url):
+    async def get_from_cdn(self, url):
         async with self.__session.get(url) as resp:
             if resp.status == 200:
                 return await resp.read()
             elif resp.status == 404:
-                raise NotFound(resp, 'attachment not found')
+                raise NotFound(resp, 'asset not found')
             elif resp.status == 403:
-                raise Forbidden(resp, 'cannot retrieve attachment')
+                raise Forbidden(resp, 'cannot retrieve asset')
             else:
-                raise HTTPException(resp, 'failed to get attachment')
+                raise HTTPException(resp, 'failed to get asset')
 
     # state management
 
@@ -626,6 +626,12 @@ class HTTPClient:
             'days': days
         }
         return self.request(Route('GET', '/guilds/{guild_id}/prune', guild_id=guild_id), params=params)
+
+    def get_all_custom_emojis(self, guild_id):
+        return self.request(Route('GET', '/guilds/{guild_id}/emojis', guild_id=guild_id))
+
+    def get_custom_emoji(self, guild_id, emoji_id):
+        return self.request(Route('GET', '/guilds/{guild_id}/emojis/{emoji_id}', guild_id=guild_id, emoji_id=emoji_id))
 
     def create_custom_emoji(self, guild_id, name, image, *, roles=None, reason=None):
         payload = {
