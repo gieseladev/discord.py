@@ -63,7 +63,7 @@ setup(name='discord.py',
       extras_require=extras_require,
       python_requires='>=3.6.3',
       classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: MIT License',
         'Intended Audience :: Developers',
         'Natural Language :: English',
