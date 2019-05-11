@@ -112,8 +112,7 @@ class Attachment:
         :class:`int`
             The number of bytes written.
         """
-        url = self.proxy_url if use_cached else self.url
-        data = await self._http.get_from_cdn(url)
+        data = await self.read(use_cached=use_cached)
         if isinstance(fp, io.IOBase) and fp.writable():
             written = fp.write(data)
             if seek_begin:
@@ -122,6 +121,42 @@ class Attachment:
         else:
             with open(fp, 'wb') as f:
                 return f.write(data)
+
+    async def read(self, *, use_cached=False):
+        """|coro|
+
+        Retrieves the content of this attachment as a :class:`bytes` object.
+
+        .. versionadded:: 1.1.0
+
+        Parameters
+        -----------
+        use_cached: :class:`bool`
+            Whether to use :attr:`proxy_url` rather than :attr:`url` when downloading
+            the attachment. This will allow attachments to be saved after deletion
+            more often, compared to the regular URL which is generally deleted right
+            after the message is deleted. Note that this can still fail to download
+            deleted attachments if too much time has passed and it does not work
+            on some type of attachments.
+
+        Raises
+        ------
+        HTTPException
+            Downloading the attachment failed.
+        Forbidden
+            You do not have permissions to access this attachment
+        NotFound
+            The attachment was deleted.
+
+        Returns
+        -------
+        :class:`bytes`
+            The contents of the attachment.
+        """
+        url = self.proxy_url if use_cached else self.url
+        data = await self._http.get_from_cdn(url)
+        return data
+
 
 class Message:
     r"""Represents a message from Discord.
@@ -563,7 +598,7 @@ class Message:
             else:
                 return '{0.author.name} started a call \N{EM DASH} Join the call.'.format(self)
 
-    async def delete(self):
+    async def delete(self, *, delay=None):
         """|coro|
 
         Deletes the message.
@@ -572,6 +607,15 @@ class Message:
         delete other people's messages, you need the :attr:`~Permissions.manage_messages`
         permission.
 
+        .. versionchanged:: 1.1.0
+            Added the new ``delay`` keyword-only parameter.
+
+        Parameters
+        -----------
+        delay: Optional[:class:`float`]
+            If provided, the number of seconds to wait in the background
+            before deleting the message.
+
         Raises
         ------
         Forbidden
@@ -579,7 +623,17 @@ class Message:
         HTTPException
             Deleting the message failed.
         """
-        await self._state.http.delete_message(self.channel.id, self.id)
+        if delay is not None:
+            async def delete():
+                await asyncio.sleep(delay, loop=self._state.loop)
+                try:
+                    await self._state.http.delete_message(self.channel.id, self.id)
+                except HTTPException:
+                    pass
+
+            asyncio.ensure_future(delete(), loop=self._state.loop)
+        else:
+            await self._state.http.delete_message(self.channel.id, self.id)
 
     async def edit(self, **fields):
         """|coro|
@@ -623,7 +677,7 @@ class Message:
             if embed is not None:
                 fields['embed'] = embed.to_dict()
 
-        data = await self._state.http.edit_message(self.id, self.channel.id, **fields)
+        data = await self._state.http.edit_message(self.channel.id, self.id, **fields)
         self._update(channel=self.channel, data=data)
 
         try:
@@ -632,14 +686,7 @@ class Message:
             pass
         else:
             if delete_after is not None:
-                async def delete():
-                    await asyncio.sleep(delete_after, loop=self._state.loop)
-                    try:
-                        await self._state.http.delete_message(self.channel.id, self.id)
-                    except HTTPException:
-                        pass
-
-                asyncio.ensure_future(delete(), loop=self._state.loop)
+                await self.delete(delay=delete_after)
 
     async def pin(self):
         """|coro|
@@ -713,7 +760,7 @@ class Message:
         """
 
         emoji = self._emoji_reaction(emoji)
-        await self._state.http.add_reaction(self.id, self.channel.id, emoji)
+        await self._state.http.add_reaction(self.channel.id, self.id, emoji)
 
     async def remove_reaction(self, emoji, member):
         """|coro|
@@ -750,9 +797,9 @@ class Message:
         emoji = self._emoji_reaction(emoji)
 
         if member.id == self._state.self_id:
-            await self._state.http.remove_own_reaction(self.id, self.channel.id, emoji)
+            await self._state.http.remove_own_reaction(self.channel.id, self.id, emoji)
         else:
-            await self._state.http.remove_reaction(self.id, self.channel.id, emoji, member.id)
+            await self._state.http.remove_reaction(self.channel.id, self.id, emoji, member.id)
 
     @staticmethod
     def _emoji_reaction(emoji):
@@ -764,7 +811,9 @@ class Message:
         if isinstance(emoji, PartialEmoji):
             return emoji._as_reaction()
         if isinstance(emoji, str):
-            return emoji # this is okay
+            # Reactions can be in :name:id format, but not <:name:id>.
+            # No existing emojis have <> in them, so this should be okay.
+            return emoji.strip('<>')
 
         raise InvalidArgument('emoji argument must be str, Emoji, or Reaction not {.__class__.__name__}.'.format(emoji))
 
@@ -782,9 +831,9 @@ class Message:
         Forbidden
             You do not have the proper permissions to remove all the reactions.
         """
-        await self._state.http.clear_reactions(self.id, self.channel.id)
+        await self._state.http.clear_reactions(self.channel.id, self.id)
 
-    def ack(self):
+    async def ack(self):
         """|coro|
 
         Marks this message as read.
@@ -802,4 +851,4 @@ class Message:
         state = self._state
         if state.is_bot:
             raise ClientException('Must not be a bot account to ack messages.')
-        return state.http.ack_message(self.channel.id, self.id)
+        return await state.http.ack_message(self.channel.id, self.id)

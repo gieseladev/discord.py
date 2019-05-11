@@ -347,7 +347,7 @@ class GuildChannel:
         """Returns all of the channel's overwrites.
 
         This is returned as a dictionary where the key contains the target which
-        can be either a :class:`Role` or a :class:`Member` and the key is the
+        can be either a :class:`Role` or a :class:`Member` and the value is the
         overwrite as a :class:`PermissionOverwrite`.
 
         Returns
@@ -365,7 +365,14 @@ class GuildChannel:
                 target = self.guild.get_role(ow.id)
             elif ow.type == 'member':
                 target = self.guild.get_member(ow.id)
-            ret[target] = overwrite
+
+            # TODO: There is potential data loss here in the non-chunked
+            # case, i.e. target is None because get_member returned nothing.
+            # This can be fixed with a slight breaking change to the return type,
+            # i.e. adding discord.Object to the list of it
+            # However, for now this is an acceptable compromise.
+            if target is not None:
+                ret[target] = overwrite
         return ret
 
     @property
@@ -536,7 +543,7 @@ class GuildChannel:
 
         Using :class:`PermissionOverwrite` ::
 
-            overwrite = PermissionOverwrite()
+            overwrite = discord.PermissionOverwrite()
             overwrite.send_messages = False
             overwrite.read_messages = True
             await channel.set_permissions(member, overwrite=overwrite)
@@ -595,6 +602,46 @@ class GuildChannel:
             await http.edit_channel_permissions(self.id, target.id, allow.value, deny.value, perm_type, reason=reason)
         else:
             raise InvalidArgument('Invalid overwrite type provided.')
+
+    async def _clone_impl(self, base_attrs, *, name=None, reason=None):
+        base_attrs['permission_overwrites'] = [
+            x._asdict() for x in self._overwrites
+        ]
+        base_attrs['parent_id'] = self.category_id
+        base_attrs['name'] = name or self.name
+        guild_id = self.guild.id
+        cls = self.__class__
+        data = await self._state.http.create_channel(guild_id, self._type, reason=reason, **base_attrs)
+        obj = cls(state=self._state, guild=self.guild, data=data)
+
+        # temporarily add it to the cache
+        self.guild._channels[obj.id] = obj
+        return obj
+
+    async def clone(self, *, name=None, reason=None):
+        """|coro|
+
+        Clones this channel. This creates a channel with the same properties
+        as this channel.
+
+        .. versionadded:: 1.1.0
+
+        Parameters
+        ------------
+        name: Optional[:class:`str`]
+            The name of the new channel. If not provided, defaults to this
+            channel name.
+        reason: Optional[:class:`str`]
+            The reason for cloning this channel. Shows up on the audit log.
+
+        Raises
+        -------
+        Forbidden
+            You do not have the proper permissions to create this channel.
+        HTTPException
+            Creating the channel failed.
+        """
+        raise NotImplementedError
 
     async def create_invite(self, *, reason=None, **fields):
         """|coro|
@@ -777,13 +824,7 @@ class Messageable(metaclass=abc.ABCMeta):
 
         ret = state.create_message(channel=channel, data=data)
         if delete_after is not None:
-            async def delete():
-                await asyncio.sleep(delete_after, loop=state.loop)
-                try:
-                    await ret.delete()
-                except HTTPException:
-                    pass
-            asyncio.ensure_future(delete(), loop=state.loop)
+            await ret.delete(delay=delete_after)
         return ret
 
     async def trigger_typing(self):

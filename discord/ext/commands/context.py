@@ -94,13 +94,18 @@ class Context(discord.abc.Messageable):
         This is useful if you want to just call the callback that a
         :class:`.Command` holds internally.
 
-        Note
-        ------
-        You do not pass in the context as it is done for you.
+        .. note::
 
-        Warning
-        ---------
-        The first parameter passed **must** be the command being invoked.
+            This does not handle converters, checks, cooldowns, pre-invoke,
+            or after-invoke hooks in any matter. It calls the internal callback
+            directly as-if it was a regular function.
+
+            You must take care in passing the proper arguments when
+            using this function.
+
+        .. warning::
+
+            The first parameter passed **must** be the command being invoked.
 
         Parameters
         -----------
@@ -261,6 +266,8 @@ class Context(discord.abc.Messageable):
         if cmd is None:
             return None
 
+        cmd = cmd.copy()
+        cmd.context = self
         if len(args) == 0:
             await cmd.prepare_help_command(self, None)
             mapping = cmd.get_bot_mapping()

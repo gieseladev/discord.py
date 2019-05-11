@@ -134,6 +134,8 @@ Checks
 
 .. autofunction:: discord.ext.commands.guild_only
 
+.. autofunction:: discord.ext.commands.dm_only
+
 .. autofunction:: discord.ext.commands.is_owner
 
 .. autofunction:: discord.ext.commands.is_nsfw
@@ -166,6 +168,9 @@ Converters
     :members:
 
 .. autoclass:: discord.ext.commands.UserConverter
+    :members:
+
+.. autoclass:: discord.ext.commands.MessageConverter
     :members:
 
 .. autoclass:: discord.ext.commands.TextChannelConverter
@@ -252,6 +257,9 @@ Exceptions
 .. autoexception:: discord.ext.commands.BadUnionArgument
     :members:
 
+.. autoexception:: discord.ext.commands.PrivateMessageOnly
+    :members:
+
 .. autoexception:: discord.ext.commands.NoPrivateMessage
     :members:
 
@@ -283,6 +291,21 @@ Exceptions
     :members:
 
 .. autoexception:: discord.ext.commands.BotMissingPermissions
+    :members:
+
+.. autoexception:: discord.ext.commands.MissingRole
+    :members:
+
+.. autoexception:: discord.ext.commands.BotMissingRole
+    :members:
+
+.. autoexception:: discord.ext.commands.MissingAnyRole
+    :members:
+
+.. autoexception:: discord.ext.commands.BotMissingAnyRole
+    :members:
+
+.. autoexception:: discord.ext.commands.NSFWChannelRequired
     :members:
 
 .. autoexception:: discord.ext.commands.ExtensionError
@@ -323,10 +346,16 @@ Exception Hierarchy
                     - :exc:`~.commands.ExpectedClosingQuoteError`
             - :exc:`~.commands.CommandNotFound`
             - :exc:`~.commands.CheckFailure`
+                - :exc:`~.commands.PrivateMessageOnly`
                 - :exc:`~.commands.NoPrivateMessage`
                 - :exc:`~.commands.NotOwner`
                 - :exc:`~.commands.MissingPermissions`
                 - :exc:`~.commands.BotMissingPermissions`
+                - :exc:`~.commands.MissingRole`
+                - :exc:`~.commands.BotMissingRole`
+                - :exc:`~.commands.MissingAnyRole`
+                - :exc:`~.commands.BotMissingAnyRole`
+                - :exc:`~.commands.NSFWChannelRequired`
             - :exc:`~.commands.DisabledCommand`
             - :exc:`~.commands.CommandInvokeError`
             - :exc:`~.commands.CommandOnCooldown`

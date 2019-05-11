@@ -100,6 +100,9 @@ class VoiceClient:
         self._state = state
         # this will be used in the AudioPlayer thread
         self._connected = threading.Event()
+
+        self._handshaking = False
+        self._handshake_check = asyncio.Lock(loop=self.loop)
         self._handshake_complete = asyncio.Event(loop=self.loop)
 
         self.mode = None
@@ -166,6 +169,12 @@ class VoiceClient:
             self._state._remove_voice_client(key_id)
 
     async def _create_socket(self, server_id, data):
+        async with self._handshake_check:
+            if self._handshaking:
+                log.info("Ignoring voice server update while handshake is in progress")
+                return
+            self._handshaking = True
+
         self._connected.clear()
         self.session_id = self.main_ws.session_id
         self.server_id = server_id
@@ -209,6 +218,7 @@ class VoiceClient:
 
         try:
             self.ws = await DiscordVoiceWebSocket.from_client(self)
+            self._handshaking = False
             self._connected.clear()
             while not hasattr(self, 'secret_key'):
                 await self.ws.poll_event()
@@ -237,6 +247,7 @@ class VoiceClient:
                     # 4014 - voice channel has been deleted.
                     # 4015 - voice server has crashed
                     if exc.code in (1000, 4014, 4015):
+                        log.info('Disconnecting from voice normally, close code %d.', exc.code)
                         await self.disconnect()
                         break
 
@@ -261,7 +272,7 @@ class VoiceClient:
 
         Disconnects this voice client from voice.
         """
-        if not force and not self._connected.is_set():
+        if not force and not self.is_connected():
             return
 
         self.stop()
@@ -348,7 +359,7 @@ class VoiceClient:
             source is not a :class:`AudioSource` or after is not a callable.
         """
 
-        if not self._connected:
+        if not self.is_connected():
             raise ClientException('Not connected to voice.')
 
         if self.is_playing():

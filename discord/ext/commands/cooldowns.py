@@ -27,7 +27,11 @@ DEALINGS IN THE SOFTWARE.
 import enum
 import time
 
-__all__ = ['BucketType', 'Cooldown', 'CooldownMapping']
+__all__ = (
+    'BucketType',
+    'Cooldown',
+    'CooldownMapping',
+)
 
 class BucketType(enum.Enum):
     default  = 0
@@ -61,8 +65,8 @@ class Cooldown:
             tokens = self.rate
         return tokens
 
-    def update_rate_limit(self):
-        current = time.time()
+    def update_rate_limit(self, current=None):
+        current = current or time.time()
         self._last = current
 
         self._tokens = self.get_tokens(current)
@@ -124,20 +128,20 @@ class CooldownMapping:
         elif bucket_type is BucketType.category:
             return (msg.channel.category or msg.channel).id
 
-    def _verify_cache_integrity(self):
+    def _verify_cache_integrity(self, current=None):
         # we want to delete all cache objects that haven't been used
         # in a cooldown window. e.g. if we have a  command that has a
         # cooldown of 60s and it has not been used in 60s then that key should be deleted
-        current = time.time()
+        current = current or time.time()
         dead_keys = [k for k, v in self._cache.items() if current > v._last + v.per]
         for k in dead_keys:
             del self._cache[k]
 
-    def get_bucket(self, message):
+    def get_bucket(self, message, current=None):
         if self._cooldown.type is BucketType.default:
             return self._cooldown
 
-        self._verify_cache_integrity()
+        self._verify_cache_integrity(current)
         key = self._bucket_key(message)
         if key not in self._cache:
             bucket = self._cooldown.copy()
@@ -146,3 +150,7 @@ class CooldownMapping:
             bucket = self._cache[key]
 
         return bucket
+
+    def update_rate_limit(self, message, current=None):
+        bucket = self.get_bucket(message, current)
+        return bucket.update_rate_limit(current)
