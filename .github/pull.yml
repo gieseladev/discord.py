@@ -1,5 +1,5 @@
 version: "1"
 rules:
   - base: rewrite
-    upstream: rapptz:rewrite        
+    upstream: rapptz:master        
     autoMerge: true
