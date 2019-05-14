@@ -3,10 +3,13 @@ import aiohttp
 import websockets
 import discord
 import inspect
+import logging
 
 from discord.backoff import ExponentialBackoff
 
 MAX_ASYNCIO_SECONDS = 3456000
+
+log = logging.getLogger(__name__)
 
 class Loop:
     """A background task helper that abstracts the loop and reconnection logic for you.
@@ -38,6 +41,7 @@ class Loop:
         self._before_loop = None
         self._after_loop = None
         self._is_being_cancelled = False
+        self._has_failed = False
         self._stop_next_iteration = False
 
         if self.count is not None and self.count <= 0:
@@ -86,11 +90,16 @@ class Loop:
         except asyncio.CancelledError:
             self._is_being_cancelled = True
             raise
+        except Exception:
+            self._has_failed = True
+            log.exception('Internal background task failed.')
+            raise
         finally:
             await self._call_loop_function('after_loop')
             self._is_being_cancelled = False
             self._current_loop = 0
             self._stop_next_iteration = False
+            self._has_failed = False
 
     def __get__(self, obj, objtype):
         if obj is None:
@@ -149,7 +158,7 @@ class Loop:
             before stopping via :meth:`clear_exception_types` or
             use :meth:`cancel` instead.
 
-        .. versionadded:: 1.2
+        .. versionadded:: 1.2.0
         """
         if self._task and not self._task.done():
             self._stop_next_iteration = True
@@ -247,6 +256,13 @@ class Loop:
     def is_being_cancelled(self):
         """:class:`bool`: Whether the task is being cancelled."""
         return self._is_being_cancelled
+
+    def failed(self):
+        """:class:`bool`: Whether the internal task has failed.
+
+        .. versionadded:: 1.2.0
+        """
+        return self._has_failed
 
     def before_loop(self, coro):
         """A decorator that registers a coroutine to be called before the loop starts running.
