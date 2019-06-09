@@ -97,6 +97,12 @@ class EnumMeta(type):
     def __iter__(cls):
         return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
 
+    def __reversed__(cls):
+        return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
+
+    def __len__(cls):
+        return len(cls._enum_member_names_)
+
     def __repr__(cls):
         return '<enum %r>' % cls.__name__
 
@@ -115,6 +121,9 @@ class EnumMeta(type):
 
     def __setattr__(cls, name, value):
         raise TypeError('Enums are immutable.')
+
+    def __delattr__(cls, attr):
+        raise TypeError('Enums are immutable')
 
     def __instancecheck__(self, instance):
         # isinstance(x, Y)
